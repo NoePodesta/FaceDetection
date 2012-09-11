@@ -11,18 +11,21 @@ import javax.swing.*;
  */
 public class MainFrame extends JFrame{
 
-    JFrame frame;
+    private JFrame frame;
+    final private String[] args;
 
-    public MainFrame(){
+    public MainFrame(String[] args){
+        this.args = args;
         buildUi();
     }
 
     private void buildUi() {
         frame = new JFrame("Face Detection Application");
-        MainPanel mainPanel = new MainPanel();
+        MainPanel mainPanel = new MainPanel(args);
         frame.add(mainPanel);
-        frame.setSize(400, 300);
+        frame.setSize(500, 500);
         frame.setVisible(true);
+        frame.pack();
     }
 
 }
