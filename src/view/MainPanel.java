@@ -11,11 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -27,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MainPanel extends JPanel {
 
-    final JComboBox comboBox = new JComboBox();
     final JFrame frame = new JFrame();
     final private String[] args;
 
@@ -39,7 +35,6 @@ public class MainPanel extends JPanel {
 
     private void buildUi() {
         setLayout(new MigLayout("fillx, ins 5, wrap 2"));
-        setVisible(true);
         JLabel label = createLabel("Face Detection");
         Font newLabelFont = new Font("Calibri", Font.BOLD, 25);
         label.setForeground(Color.getHSBColor(106, 172, 252));
@@ -54,10 +49,50 @@ public class MainPanel extends JPanel {
 
         final JVideoScreen videoScreen = new JVideoScreen();
 
+        startWebCam(webCamPanel,webcam,videoScreen,frameRef,lastFrameRef);
+
+        add(label, "align center, wrap");
+        add(createLabel("Webcam: "));
+        webCamPanel.setLayout(new MigLayout("fill, ins 5, wrap 2"));
+        add(webCamPanel);
+
+        JButton snapshotButton = new JButton("Snapshot");
+        add(snapshotButton, "align right");
+        final JToggleButton stopWebCam = new JToggleButton("Stop WebCam", false);
+        add(stopWebCam, "align right");
+
+        snapshotButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                new SnapshotDialog(VideoFrameFactory.clone(lastFrameRef.get())).setVisible(true);
+            }
+        });
+
+        stopWebCam.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                System.out.println(itemEvent.getStateChange());
+                if(itemEvent.getStateChange()==1){
+                    webcam.close();
+                    stopWebCam.setText("Start WebCam");
+                }
+                else{
+                    startWebCam(webCamPanel,webcam,videoScreen,frameRef,lastFrameRef);
+                    stopWebCam.setText("Stop WebCam");
+                }
+                }
+        });
+
+    }
+
+
+    private JLabel createLabel(String text) {
+        return new JLabel(text, SwingConstants.CENTER);
+    }
+    
+    private void startWebCam(final JPanel webCamPanel, final IWebcam webcam, final JVideoScreen videoScreen, final AtomicReference<JFrame> frameRef, final AtomicReference<VideoFrame> lastFrameRef){
         new Thread(new Runnable() {
             public void run() {
-
-
                 try {
                     webcam.open(new IWebcam.FrameFormat(400, 300), new IWebcam.IListener() {
                         private VideoFrame lastFrame = new VideoFrame(0, 0, null);
@@ -94,65 +129,7 @@ public class MainPanel extends JPanel {
                 }
             }
         }).start();
-
-        add(label, "align center, wrap");
-        add(createLabel("Webcam: "));
-        webCamPanel.setSize(500, 500);
-        webCamPanel.setLayout(new MigLayout("fill, ins 5, wrap 2"));
-        add(webCamPanel);
-
-        JButton snapshotButton = new JButton("Snapshot");
-        add(snapshotButton, "align right");
-
-        snapshotButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                new SnapshotDialog(VideoFrameFactory.clone(lastFrameRef.get())).setVisible(true);
-            }
-        });
-
-    }
-
-    private final static class WebcamComboModel extends AbstractListModel implements ComboBoxModel {
-        private final static long serialVersionUID = -8627944517955777531L;
-
-        // fields
-        private final java.util.List<IWebcam> devices;
-        // state
-        private Object selected = null;
-
-        /**
-         * Constructor.
-         *
-         * @param devices
-         */
-        public WebcamComboModel(java.util.List<IWebcam> devices) {
-            this.devices = devices;
-        }
-
-        // MutableComboBoxModel implementation
-
-        public void setSelectedItem(final Object item) {
-            this.selected = item;
-        }
-
-        public Object getSelectedItem() {
-            return selected;
-        }
-
-        public Object getElementAt(int index) {
-            return devices.get(index);
-        }
-
-        public int getSize() {
-            return devices.size();
-        }
-
-    }
-
-
-    private JLabel createLabel(String text) {
-        return new JLabel(text, SwingConstants.CENTER);
+       
     }
 }
 

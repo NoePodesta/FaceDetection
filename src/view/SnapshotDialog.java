@@ -31,9 +31,10 @@ public class SnapshotDialog extends JDialog
      */
     public SnapshotDialog(final VideoFrame videoFrame)
     {
-        this.setLayout(new BorderLayout());
-        this.setResizable(false);
-        this.setTitle("Photo snapshot");
+        setLayout(new BorderLayout());
+        setResizable(false);
+        setTitle("Photo snapshot");
+
 
         JVideoScreen videoScreen = new JVideoScreen();
 
@@ -95,7 +96,7 @@ public class SnapshotDialog extends JDialog
             }
         });
 
-        this.add(videoScreen, BorderLayout.CENTER);
-        this.pack();
+        add(videoScreen, BorderLayout.CENTER);
+        pack();
     }
 }
