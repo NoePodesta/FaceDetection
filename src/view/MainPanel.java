@@ -44,22 +44,23 @@ public class MainPanel extends JPanel {
         final AtomicReference<JFrame> frameRef = new AtomicReference<JFrame>();
         final AtomicReference<VideoFrame> lastFrameRef = new AtomicReference<VideoFrame>();
 
-        final IWebcam webcam = WebcamFactory.getWebcams(frame, args.length == 0 ? "jitsi" : args[0]).get(0);
+        final IWebcam webcam = WebcamFactory.getWebcams(this, args.length == 0 ? "jitsi" : args[0]).get(0);
         if (webcam == null) return;
 
         final JVideoScreen videoScreen = new JVideoScreen();
 
         startWebCam(webCamPanel,webcam,videoScreen,frameRef,lastFrameRef);
 
-        add(label, "align center, wrap");
-        add(createLabel("Webcam: "));
-        webCamPanel.setLayout(new MigLayout("fill, ins 5, wrap 2"));
-        add(webCamPanel);
+        add(label, "align center, wrap, span 2");
+        webCamPanel.setLayout(new MigLayout());
+        webCamPanel.setVisible(true);
+        webCamPanel.setSize(400,300);
+        add(webCamPanel, "align center, wrap, span 2");
 
         JButton snapshotButton = new JButton("Snapshot");
         add(snapshotButton, "align right");
-        final JToggleButton stopWebCam = new JToggleButton("Stop WebCam", false);
-        add(stopWebCam, "align right");
+        final JToggleButton toggleButtonWebCam = new JToggleButton("Stop WebCam", false);
+        add(toggleButtonWebCam, "align left");
 
         snapshotButton.addActionListener(new ActionListener() {
             @Override
@@ -68,19 +69,18 @@ public class MainPanel extends JPanel {
             }
         });
 
-        stopWebCam.addItemListener(new ItemListener() {
+        toggleButtonWebCam.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                System.out.println(itemEvent.getStateChange());
-                if(itemEvent.getStateChange()==1){
+                if (itemEvent.getStateChange() == 1) {
+                    webcam.stopCapture();
                     webcam.close();
-                    stopWebCam.setText("Start WebCam");
+                    toggleButtonWebCam.setText("Start WebCam");
+                } else {
+                    startWebCam(webCamPanel, webcam, videoScreen, frameRef, lastFrameRef);
+                    toggleButtonWebCam.setText("Stop WebCam");
                 }
-                else{
-                    startWebCam(webCamPanel,webcam,videoScreen,frameRef,lastFrameRef);
-                    stopWebCam.setText("Stop WebCam");
-                }
-                }
+            }
         });
 
     }

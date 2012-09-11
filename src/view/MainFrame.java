@@ -23,9 +23,11 @@ public class MainFrame extends JFrame{
         frame = new JFrame("Face Detection Application");
         MainPanel mainPanel = new MainPanel(args);
         frame.add(mainPanel);
-        frame.setSize(500, 500);
+        frame.setSize(600, 500);
         frame.setVisible(true);
-        frame.pack();
+
     }
+
+
 
 }
