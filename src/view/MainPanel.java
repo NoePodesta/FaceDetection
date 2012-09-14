@@ -7,12 +7,15 @@ import com.smaxe.uv.na.WebcamFactory;
 import com.smaxe.uv.na.webcam.IWebcam;
 import net.miginfocom.swing.MigLayout;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -20,7 +23,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * User: NoePodesta
  * Date: 10/09/12
  * Time: 10:59
- * To change this template use File | Settings | File Templates.
  */
 public class MainPanel extends JPanel {
 
@@ -65,7 +67,16 @@ public class MainPanel extends JPanel {
         snapshotButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                new SnapshotDialog(VideoFrameFactory.clone(lastFrameRef.get())).setVisible(true);
+                VideoFrame videoFrame = VideoFrameFactory.clone(lastFrameRef.get());
+                File file = new File("images/image.jpg");
+                try {
+                    VideoFrameFactory.saveAsJpg(file, videoFrame);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                new SnapshotDialog(videoFrame).setVisible(true);
             }
         });
 
