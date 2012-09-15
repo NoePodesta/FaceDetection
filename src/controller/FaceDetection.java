@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 
-public class Main {
+public class FaceDetection {
     public static void findFaces(BufferedImage bi, int minScale, int maxScale, File output) {
         try {
             // step #2 - convert BufferedImage to JJIL Image
@@ -24,7 +24,7 @@ public class Main {
             RgbAvgGray toGray = new RgbAvgGray();
             toGray.push(im);
             // step #4 - initialise face detector with correct Haar profile
-            File file = new File("/home/debian/Desktop/HCSB.txt");
+            File file = new File("images/HCSB.txt");
             InputStream is  = new FileInputStream(file);
             Gray8DetectHaarMultiScale detectHaar = new Gray8DetectHaarMultiScale(is, minScale, maxScale);
             // step #5 - apply face detector to grayscale image
@@ -43,9 +43,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         // step #1 - read source image
-        URL url = new URL("http://d3araz99qvcc8b.cloudfront.net/wp-content/uploads/2011/01/test.jpg");
-        BufferedImage bi = ImageIO.read(url);
+        File file = new File("images/image.jpg");
+        BufferedImage bi = ImageIO.read(file);
         // onto following steps...
-        findFaces(bi, 1, 40, new File("/home/debian/Desktop/out2.jpg")); // change as needed
+        findFaces(bi, 1, 40, new File("images/FaceDetection.jpg")); // change as needed
     }
 }

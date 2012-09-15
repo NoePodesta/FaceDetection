@@ -5,6 +5,7 @@ import com.smaxe.uv.media.core.VideoFrame;
 import com.smaxe.uv.media.swing.JVideoScreen;
 import com.smaxe.uv.na.WebcamFactory;
 import com.smaxe.uv.na.webcam.IWebcam;
+import controller.FaceDetection;
 import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
@@ -28,6 +29,8 @@ public class MainPanel extends JPanel {
 
     final JFrame frame = new JFrame();
     final private String[] args;
+    VideoFrame backgroundFrame;
+    int[] backgroundRGB;
 
 
     public MainPanel(String[] args) {
@@ -36,7 +39,9 @@ public class MainPanel extends JPanel {
     }
 
     private void buildUi() {
-        setLayout(new MigLayout("fillx, ins 5, wrap 2"));
+        
+        
+        setLayout(new MigLayout("fillx, ins 5, wrap 3"));
         JLabel label = createLabel("Face Detection");
         Font newLabelFont = new Font("Calibri", Font.BOLD, 25);
         label.setForeground(Color.getHSBColor(106, 172, 252));
@@ -53,30 +58,62 @@ public class MainPanel extends JPanel {
 
         startWebCam(webCamPanel,webcam,videoScreen,frameRef,lastFrameRef);
 
-        add(label, "align center, wrap, span 2");
+        add(label, "align center, wrap, span 3");
         webCamPanel.setLayout(new MigLayout());
         webCamPanel.setVisible(true);
         webCamPanel.setSize(400,300);
-        add(webCamPanel, "align center, wrap, span 2");
+        add(webCamPanel, "align center, wrap, span 3");
 
-        JButton snapshotButton = new JButton("Snapshot");
-        add(snapshotButton, "align right");
+        JButton backgroundSnapshot = new JButton("Background snapshot");
+        backgroundSnapshot.setBackground(Color.DARK_GRAY);
+        add(backgroundSnapshot, "align center");
+
+        JButton snapshot =  new JButton("Snapshot");
+        snapshot.setBackground(Color.DARK_GRAY);
+        add(snapshot, "align center");
+
         final JToggleButton toggleButtonWebCam = new JToggleButton("Stop WebCam", false);
-        add(toggleButtonWebCam, "align left");
+        toggleButtonWebCam.setBackground(Color.DARK_GRAY);
+        add(toggleButtonWebCam, "align center");
+        
+        final JLabel label1 = new JLabel("1) You need to took first the background image");
 
-        snapshotButton.addActionListener(new ActionListener() {
+
+
+        backgroundSnapshot.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                VideoFrame videoFrame = VideoFrameFactory.clone(lastFrameRef.get());
-                File file = new File("images/image.jpg");
+                backgroundFrame = VideoFrameFactory.clone(lastFrameRef.get());
+                backgroundRGB = backgroundFrame.rgb;
+                File file = new File("images/imageBackGround.jpg");
                 try {
-                    VideoFrameFactory.saveAsJpg(file, videoFrame);
+                    VideoFrameFactory.saveAsJpg(file, backgroundFrame);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
 
-
-                new SnapshotDialog(videoFrame).setVisible(true);
+        snapshot.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                VideoFrame imageFrame = VideoFrameFactory.clone(lastFrameRef.get());
+                int[] imageRGB = imageFrame.rgb;
+                File file = new File("images/image.jpg");
+                try {
+                    VideoFrameFactory.saveAsJpg(file, imageFrame);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                int[] finalImageRGB = new int[backgroundRGB.length];
+                
+                for(int i=0; i< backgroundRGB.length; i++ ){
+                     finalImageRGB[i] = backgroundRGB[i]-imageRGB[i];
+                    
+                }
+                VideoFrame finalImage = new VideoFrame(400,300,finalImageRGB);
+                new SnapshotDialog(finalImage).setVisible(true);
+                new SnapshotDialog(imageFrame).setVisible(true);
             }
         });
 
@@ -106,7 +143,7 @@ public class MainPanel extends JPanel {
             public void run() {
                 try {
                     webcam.open(new IWebcam.FrameFormat(400, 300), new IWebcam.IListener() {
-                        private VideoFrame lastFrame = new VideoFrame(0, 0, null);
+                        private VideoFrame lastFrame = new VideoFrame(400, 300, null);
 
                         public void onVideoFrame(final VideoFrame frame) {
                             SwingUtilities.invokeLater(new Runnable() {
